@@ -16,7 +16,14 @@ PHP 5.2 is supported fully.
 Officially PHP doesn't have a published language specification. Hence in order to be sure the parser supports the official grammar it is checked on the open source projects that are proven to be syntactically correct.
 
 ## Projects used as the test material
-The following codebase is used for the test purposes. These sources are interpreted correctly: 1. phpBB3 3.10 1. Zend Framework 1. Yii Framework 1.1.10 1. Kohana 3.2 1. phpMyAdmin 3.4.10 1. MediaWiki 1.18.1
+The following codebase is used for the test purposes. 
+These sources are interpreted correctly: 
+1. phpBB3 3.10 
+2. Zend Framework 
+3. Yii Framework 1.1.10 
+4. Kohana 3.2 
+5. phpMyAdmin 3.4.10 
+6. MediaWiki 1.18.1
 
 # Instructions
 It is possible to easily see the parser working. The parser library has a console interface which is currently used for test purposes but it can be used just to check whether it works and see the ASTs constructed for different syntactical constructions.
