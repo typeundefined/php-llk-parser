@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project>
+    <property name="lib.dir" value="lib"/>
+    <property name="src.dir" value="src"/>
+    <property name="dest.dir" value="bin/"/>
+    <property name="grammar.dir" value="resources/grammar"/>
+    <property name="version.major" value="1"/>
+    <property name="version.minor" value="0"/>
+    <property name="version.state" value="beta"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+    <target name="find_revision" description="Sets property 'revision.number' to the head svn revision">
+      <property name="revision" value="HEAD"/>
+
+      <!-- find out revision number of HEAD, need svn.exe installed on local machine -->
+      <exec executable="svn" output="svnlog.out">
+        <arg line="info ${src.dir}/../build.xml"/>
+      </exec>
+      <loadproperties srcfile="svnlog.out"/>
+      <echo>current revision is ${Revision}</echo>
+      <delete file="svnlog.out"/>
+    </target>
+    <target name="cleangrammar">
+      <delete includeemptydirs="true">
+        <fileset dir="${grammar.dir}">
+          <include name="**/*.java"/>
+          <include name="**/*.smap"/>
+          <include name="**/*.txt"/>
+        </fileset>
+      </delete>
+    </target>
+
+    <target name="invokeantlr" depends="cleangrammar">
+      
+
+      <java classname="antlr.Tool"
+        dir="${grammar.dir}"
+        fork="true"
+        failonerror="true"
+        maxmemory="128m">
+        <arg value="phpLexer.g"/>
+        <classpath>
+          <pathelement location="${lib.dir}/antlr.jar"/>
+        </classpath>
+      </java>
+      <java classname="antlr.Tool"
+        failonerror="true"
+        dir="${grammar.dir}"
+        fork="true"
+        maxmemory="128m">
+        <arg value="phpOutTheCode.g"/>
+        <classpath>
+          <pathelement location="${lib.dir}/antlr.jar"/>
+        </classpath>
+      </java>
+      <java classname="antlr.Tool"
+        failonerror="true"
+        fork="true"
+        dir="${grammar.dir}"
+        maxmemory="128m">
+        <arg value="php.g"/>
+        <classpath>
+          <pathelement location="${lib.dir}/antlr.jar"/>
+        </classpath>
+      </java>
+
+      <mkdir dir="${src.dir}/php/parser/antlr/"/>
+
+      <move todir="${src.dir}/php/parser/antlr/">
+        <fileset dir="${grammar.dir}">
+          <include name="**/*.java"/>
+        </fileset>
+      </move>
+
+    </target>
+
+    <target name="clean">
+      <delete dir="bin"/>
+    </target>
+
+    <target name="build" depends="find_revision,clean,invokeantlr">
+      <mkdir dir="${dest.dir}"/>
+      <javac srcdir="${src.dir}" destdir="${dest.dir}" classpathref="classpath"/>
+    </target>
+	
+	  <target name="testjar" depends="build">
+          <property name="jar.filename" value="php-parser.${version.major}.${version.minor}.r${Revision}.${version.state}.jar"/>
+	        <mkdir dir="bin/jar"/>
+          <manifestclasspath property="manifest_cp" jarfile="${jar.filename}">
+	            <classpath refid="classpath" />
+	        </manifestclasspath>
+          <jar destfile="bin/jar/${jar.filename}" basedir="${dest.dir}">
+	            <zipgroupfileset dir="${lib.dir}" includes="*.jar" /> 
+	            <manifest>
+	                <attribute name="Main-Class" value="php.parser.util.console.Main"/>
+	              <!-- <attribute name="Class-Path" value="."/> -->
+                <attribute name="Implementation-Version" 
+                  value="${version.major}.${version.minor}.r${Revision}.${version.state}"/>
+	            </manifest>
+	        </jar>
+	    </target>
+</project>
+
